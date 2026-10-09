@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StringCast Web SDK demo</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 16px; color: #222; background: #fff; }
+    code, pre { background: #f3f3f3; padding: 2px 4px; border-radius: 4px; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 1rem 0; }
+    #log { font-size: 13px; color: #555; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <!--
+    Run the backend first:   cd backend && npm install && npm run seed && npm run dev
+    Build the SDK:           cd sdk-web && npm install && npm run build
+    Then serve the folder:   npx serve sdk-web   (or python3 -m http.server -d sdk-web)
+    and open http://localhost:3000/examples/  (or :8000/examples/).
+  -->
+  <h1 data-key="welcome_title">Welcome</h1>
+  <p id="items"></p>
+  <p id="greeting"></p>
+
+  <div class="row">
+    <label>Language
+      <select id="lang"><option value="">Device default</option></select>
+    </label>
+    <button id="refresh">Force refresh</button>
+  </div>
+  <p>Resolved language: <code id="resolved">-</code> · release <code id="version">-</code></p>
+  <div id="log"></div>
+
+  <script src="../dist/stringcast.global.js"></script>
+  <script>
+    var log = function (msg) { document.getElementById('log').textContent += msg + '\n'; };
+
+    var stringcast = StringCast.createStringCast({
+      projectId: 'p_demo',
+      sdkKey: 'pk_demo_local',
+      baseUrl: 'http://localhost:8787',
+      // baseUrl: 'https://console.stringcast.app', // production (also the default when baseUrl is omitted)
+      draftMode: true,           // reports keys used below that the project lacks (demo only)
+      refreshIntervalMs: 0,      // always check the manifest on load (demo only)
+    });
+
+    function render() {
+      document.querySelectorAll('[data-key]').forEach(function (el) {
+        el.textContent = stringcast.t(el.getAttribute('data-key'), undefined, el.textContent);
+      });
+      document.getElementById('items').textContent =
+        [0, 1, 5].map(function (n) { return stringcast.plural('items_count', n, undefined, { one: '%d item', other: '%d items' }); }).join(' · ');
+      document.getElementById('greeting').textContent =
+        stringcast.t('web_demo_greeting', { name: 'Ana' }, 'Hello {name}, this string came from the web demo');
+      document.getElementById('resolved').textContent = stringcast.language || '-';
+      document.getElementById('version').textContent = 'v' + stringcast.version;
+
+      var select = document.getElementById('lang');
+      var current = select.value;
+      select.innerHTML = '<option value="">Device default</option>' +
+        stringcast.languages.map(function (c) { return '<option value="' + c + '">' + c + '</option>'; }).join('');
+      select.value = current;
+    }
+
+    render(); // cached translations, no network wait
+    stringcast.onUpdate(function (e) { log('update: ' + JSON.stringify(e)); render(); });
+    stringcast.ready.then(function () { log('ready'); render(); });
+
+    document.getElementById('lang').addEventListener('change', function (e) { stringcast.setLanguage(e.target.value || null); render(); });
+    document.getElementById('refresh').addEventListener('click', function () { stringcast.refresh({ force: true }).then(render); });
+  </script>
+</body>
+</html>

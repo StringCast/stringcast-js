@@ -1,0 +1,43 @@
+{
+  "name": "@stringcast/cli",
+  "version": "0.1.0",
+  "description": "Push and pull string files to StringCast (Android strings.xml, iOS .strings/.stringsdict/.xcstrings, web JSON)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "stringcast": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.5.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stringcast/stringcast-js.git",
+    "directory": "cli"
+  },
+  "homepage": "https://console.stringcast.app/docs",
+  "bugs": {
+    "url": "https://github.com/stringcast/stringcast-js/issues"
+  },
+  "author": "Adnan Fuentes Diaz",
+  "publishConfig": {
+    "access": "public"
+  }
+}
